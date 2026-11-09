@@ -229,7 +229,13 @@ footer .mark{font-size:1.3rem}
 <script>
 (function(){
   var f=document.getElementById("inquiry");
-  if(f&&!/netlify\.app$|resonateripple|8ripple8/.test(location.hostname)){f.addEventListener("submit",function(e){e.preventDefault();document.getElementById("sent").hidden=false})}
+  var live=/netlify\.app$|resonateripple|8ripple8/.test(location.hostname);
+  if(f){f.addEventListener("submit",function(e){e.preventDefault();var m=document.getElementById("sent");
+    if(!live){m.hidden=false;return}
+    var b=f.querySelector("button");b.disabled=true;
+    fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(new FormData(f)).toString()})
+      .then(function(r){if(!r.ok)throw 0;f.reset();m.textContent="Thank you. Your message has been received, and you'll hear back within a few days.";m.hidden=false})
+      .catch(function(){m.textContent="Something went wrong sending your message. Please try again in a moment.";m.hidden=false;b.disabled=false})})}
   var c=document.getElementById("water");if(!c||!c.getContext)return;
   var x=c.getContext("2d"),w=0,h=0,t0=performance.now();
   var still=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
